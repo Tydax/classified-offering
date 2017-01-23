@@ -49,9 +49,8 @@ namespace classified_offering.Models
     public class LoginViewModel
     {
         [Required]
-        [Display(Name = "Courrier électronique")]
-        [EmailAddress]
-        public string Email { get; set; }
+        [Display(Name = "Pseudonyme")]
+        public string Pseudo { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
@@ -64,6 +63,17 @@ namespace classified_offering.Models
 
     public class RegisterViewModel
     {
+        [Required]
+        [StringLength(30, ErrorMessage = "La chaîne {0} doit comporter au moins {2} caractères.", MinimumLength = 2)]
+        [Display(Name = "Pseudonyme")]
+        public string Pseudo { get; set; }
+
+        [Display(Name = "Prénom")]
+        public string FirstName { get; set; }
+
+        [Display(Name = "Nom")]
+        public string LastName { get; set; }
+
         [Required]
         [EmailAddress]
         [Display(Name = "Courrier électronique")]
@@ -84,9 +94,8 @@ namespace classified_offering.Models
     public class ResetPasswordViewModel
     {
         [Required]
-        [EmailAddress]
-        [Display(Name = "Courrier électronique")]
-        public string Email { get; set; }
+        [Display(Name = "Pseudonyme")]
+        public string Pseudo { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "La chaîne {0} doit comporter au moins {2} caractères.", MinimumLength = 6)]
