@@ -1,0 +1,42 @@
+﻿@model classified_offering.Models.Participation
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Participation</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ClassifiedOffering.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ClassifiedOffering.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Offerer.Pseudo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Offerer.Pseudo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Receiver.Pseudo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Receiver.Pseudo)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

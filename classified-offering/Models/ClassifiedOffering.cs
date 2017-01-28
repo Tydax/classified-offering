@@ -14,6 +14,8 @@ namespace classified_offering.Models
         [DataType(DataType.Date)]
         public DateTime CreationDate { get; set; }
         public int CreatorID { get; set; }
-        public virtual ApplicationUser Creator { get; set; }
+        public virtual User Creator { get; set; }
+
+        public virtual ICollection<Participation> Participations { get; set; }
     }
 }
