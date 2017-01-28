@@ -14,34 +14,43 @@ namespace classified_offering.Controllers
     {
         private ClassifiedOfferingDbContext db = new ClassifiedOfferingDbContext();
 
-        // GET: Participations
-        public ActionResult Index()
+        private ActionResult CheckAuthenticated(int? id)
         {
-            var participations = db.Participations.Include(p => p.ClassifiedOffering).Include(p => p.Offerer).Include(p => p.Receiver);
-            return View(participations.ToList());
+            User user = (User) Session["connectedUser"];
+
+            bool hasAccess = false;
+            if (user != null && id != null)
+            {
+                ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
+                hasAccess = user.ID == classifiedOffering.CreatorID || user.Role == 0;
+            }
+            
+            return !hasAccess
+                 ? Redirect("/User/SignIn")
+                 : null;
         }
 
-        // GET: Participations/Details/5
-        public ActionResult Details(int? id)
+        // GET: Participations/Add
+        public ActionResult Add(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Participation participation = db.Participations.Find(id);
-            if (participation == null)
+
+            ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
+            if (classifiedOffering == null)
             {
                 return HttpNotFound();
             }
-            return View(participation);
-        }
 
-        // GET: Participations/Create
-        public ActionResult Create()
-        {
-            ViewBag.ClassifiedOfferingID = new SelectList(db.ClassifiedOfferings, "ID", "Name");
+            ActionResult notAuthenticated = CheckAuthenticated(id);
+            if (notAuthenticated != null)
+            {
+                return notAuthenticated;
+            }
+
             ViewBag.OffererID = new SelectList(db.Users, "ID", "Pseudo");
-            ViewBag.ReceiverID = new SelectList(db.Users, "ID", "Pseudo");
             return View();
         }
 
@@ -50,54 +59,31 @@ namespace classified_offering.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,OffererID,ClassifiedOfferingID,ReceiverID")] Participation participation)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Participations.Add(participation);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            ViewBag.ClassifiedOfferingID = new SelectList(db.ClassifiedOfferings, "ID", "Name", participation.ClassifiedOfferingID);
-            ViewBag.OffererID = new SelectList(db.Users, "ID", "Pseudo", participation.OffererID);
-            ViewBag.ReceiverID = new SelectList(db.Users, "ID", "Pseudo", participation.ReceiverID);
-            return View(participation);
-        }
-
-        // GET: Participations/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Create([Bind(Include = "ID,OffererID")] Participation participation, int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Participation participation = db.Participations.Find(id);
-            if (participation == null)
+
+            ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
+            if (classifiedOffering == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ClassifiedOfferingID = new SelectList(db.ClassifiedOfferings, "ID", "Name", participation.ClassifiedOfferingID);
-            ViewBag.OffererID = new SelectList(db.Users, "ID", "Pseudo", participation.OffererID);
-            ViewBag.ReceiverID = new SelectList(db.Users, "ID", "Pseudo", participation.ReceiverID);
-            return View(participation);
-        }
+            ActionResult notAuthenticated = CheckAuthenticated(id);
+            if (notAuthenticated != null)
+            {
+                return notAuthenticated;
+            }
 
-        // POST: Participations/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,OffererID,ClassifiedOfferingID,ReceiverID")] Participation participation)
-        {
             if (ModelState.IsValid)
             {
-                db.Entry(participation).State = EntityState.Modified;
+                db.Participations.Add(participation);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/ClassifiedOfferings/Details/" + id);
             }
-            ViewBag.ClassifiedOfferingID = new SelectList(db.ClassifiedOfferings, "ID", "Name", participation.ClassifiedOfferingID);
-            ViewBag.OffererID = new SelectList(db.Users, "ID", "Pseudo", participation.OffererID);
+
             ViewBag.ReceiverID = new SelectList(db.Users, "ID", "Pseudo", participation.ReceiverID);
             return View(participation);
         }
@@ -114,6 +100,12 @@ namespace classified_offering.Controllers
             {
                 return HttpNotFound();
             }
+            ActionResult notAuthenticated = CheckAuthenticated(participation.ClassifiedOfferingID);
+            if (notAuthenticated != null)
+            {
+                return notAuthenticated;
+            }
+
             return View(participation);
         }
 
@@ -123,9 +115,14 @@ namespace classified_offering.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Participation participation = db.Participations.Find(id);
+            ActionResult notAuthenticated = CheckAuthenticated(participation.ClassifiedOfferingID);
+            if (notAuthenticated != null)
+            {
+                return notAuthenticated;
+            }
             db.Participations.Remove(participation);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return Redirect("/ClassifiedOfferings/Details/" + id);
         }
 
         protected override void Dispose(bool disposing)

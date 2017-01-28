@@ -277,9 +277,7 @@
     <Content Include="Views\ClassifiedOfferings\Details.cshtml" />
     <Content Include="Views\ClassifiedOfferings\Edit.cshtml" />
     <Content Include="Views\ClassifiedOfferings\Index.cshtml" />
-    <Content Include="Views\Users\Create.cshtml" />
-    <Content Include="Views\Users\Delete.cshtml" />
-    <Content Include="Views\Users\Details.cshtml" />
+    <Content Include="Views\Users\Signup.cshtml" />
     <Content Include="Views\Users\Edit.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
     <Content Include="Views\Participations\Create.cshtml" />
@@ -287,6 +285,7 @@
     <Content Include="Views\Participations\Details.cshtml" />
     <Content Include="Views\Participations\Edit.cshtml" />
     <Content Include="Views\Participations\Index.cshtml" />
+    <Content Include="Views\Users\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
