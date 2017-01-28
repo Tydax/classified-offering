@@ -75,7 +75,7 @@ namespace classified_offering.Controllers
         // POST: Users/SignIn
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Auth([Bind(Include = "Pseudo,Password")] User user)
+        public ActionResult SignIn([Bind(Include = "Pseudo,Password")] User user)
         {
             User userDb = db.Users.First(u => u.Pseudo == user.Pseudo && u.Password == user.Password);
 
@@ -85,7 +85,7 @@ namespace classified_offering.Controllers
                 return Redirect("/ClassifiedOfferings");
             }
 
-            return View(user)
+            return View(user);
         }
 
         protected override void Dispose(bool disposing)

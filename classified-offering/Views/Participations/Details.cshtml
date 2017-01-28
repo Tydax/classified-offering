@@ -34,9 +34,22 @@
             @Html.DisplayFor(model => model.Receiver.Pseudo)
         </dd>
 
+        <dt>
+            @Html.DisplayNameFor(model => model.ClassifiedOffering.Participations)
+        </dt>
+
+        <dd>
+            <ul>
+                @foreach (var item in Model.ClassifiedOffering.Participations)
+                {
+                    <li>@Html.DisplayFor(modelItem => item.Offerer.Pseudo)</li>
+                }
+            </ul>
+        </dd>
     </dl>
 </div>
 <p>
+    @Html.RouteLink("/Participations", new { id = Model.ID }) |B
     @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
     @Html.ActionLink("Back to List", "Index")
 </p>
