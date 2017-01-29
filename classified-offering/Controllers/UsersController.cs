@@ -14,10 +14,11 @@ namespace classified_offering.Controllers
     {
         private ClassifiedOfferingDbContext db = new ClassifiedOfferingDbContext();
 
-        // GET: Users
-        public ActionResult Index()
+        private ActionResult CheckAuthenticated()
         {
-            return View(db.Users.ToList());
+            return Session["connectedUser"] != null
+                 ? Redirect("/")
+                 : null;
         }
 
         // GET: Users/Details/5
@@ -46,7 +47,7 @@ namespace classified_offering.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Pseudo,FirstName,LastName,Email,Password")] User user)
+        public ActionResult SignUp([Bind(Include = "ID,Pseudo,FirstName,LastName,Email,Password")] User user)
         {
             if (db.Users.First(u => u.Pseudo == user.Pseudo) != null)
             {
@@ -60,7 +61,7 @@ namespace classified_offering.Controllers
                           : 1;
                 db.Users.Add(user);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/ClassifiedOfferings");
             }
 
             return View(user);
@@ -86,6 +87,21 @@ namespace classified_offering.Controllers
             }
 
             return View(user);
+        }
+
+        // POST: Users/SignOut
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SignOut()
+        {
+            ActionResult authenticated = CheckAuthenticated();
+
+            if (authenticated != null)
+            {
+                Session["connectedUser"] = null;
+            }
+
+            return Redirect("/");
         }
 
         protected override void Dispose(bool disposing)
