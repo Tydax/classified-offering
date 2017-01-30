@@ -1,5 +1,7 @@
-﻿@model classified_offering.Models.ClassifiedOffering
+﻿@using classified_offering.Models
+@model classified_offering.Models.ClassifiedOffering
 
+@{bool isAdmin = ((User)Session["connectedUser"]).Role == 0;}
 @{
     ViewBag.Title = "Classified offering details";
 }
@@ -40,7 +42,12 @@
             <ul>
                 @foreach (var item in Model.Participations)
                 {
-                    <li>@Html.DisplayFor(modelItem => item.Offerer.Pseudo)</li>
+                    <li>@Html.DisplayFor(modelItem => item.Offerer.Pseudo)
+                        @if (isAdmin) {
+                            <text> => </text>
+                            @Html.DisplayFor(modelItem => item.Receiver.Pseudo)
+                        }
+                    </li>
                 }
             </ul>
         </dd>

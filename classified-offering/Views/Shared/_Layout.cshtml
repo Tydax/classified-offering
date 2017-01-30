@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using classified_offering.Models
+@{ User connectedUser = (User)HttpContext.Current.Session["ConnectedUser"]; }
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -23,6 +25,11 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Accueil", "Index", "Home")</li>
+                    @if (connectedUser != null)
+                    {
+                        <li>@Html.ActionLink("My classified offerings", "Index", "ClassifiedOfferings")</li>
+                        <li>@Html.ActionLink("My participations", "Index", "Participations")</li>
+                    }
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

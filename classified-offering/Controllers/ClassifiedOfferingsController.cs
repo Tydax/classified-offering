@@ -20,7 +20,7 @@ namespace classified_offering.Controllers
 
             if (user == null)
             {
-                return Redirect("/User/SignIn");
+                return RedirectToAction("SignIn", "Users");
             }
 
             if (id != null && user.ID != id && user.Role != 0)
@@ -133,14 +133,16 @@ namespace classified_offering.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,CreationDate,CreatorID")] ClassifiedOffering classifiedOffering)
         {
-            ActionResult NotAuthenticated = CheckAuthenticated(classifiedOffering.CreatorID);
+            ClassifiedOffering data = db.ClassifiedOfferings.Find(classifiedOffering.ID);
+            ActionResult NotAuthenticated = CheckAuthenticated(data.CreatorID);
             if (NotAuthenticated != null)
             {
                 return NotAuthenticated;
             }
             if (ModelState.IsValid)
             {
-                db.Entry(classifiedOffering).State = EntityState.Modified;
+                db.Entry(data).State = EntityState.Modified;
+                data.Name = classifiedOffering.Name;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -217,7 +219,8 @@ namespace classified_offering.Controllers
             if (!classifiedOffering.isLocked)
             {
                 classifiedOffering.isLocked = true;
-                generateParticipations(classifiedOffering);
+                generateParticipations(classifiedOffering.Participations);
+                db.Entry(classifiedOffering).State = EntityState.Modified;
                 db.SaveChanges();
             }
 
@@ -227,11 +230,9 @@ namespace classified_offering.Controllers
 
         private static Random RNG = new Random();
 
-        private void generateParticipations(ClassifiedOffering co)
+        private void generateParticipations(ICollection<Participation> participations)
         {
-            ICollection<Participation> participations = co.Participations;
             IList<User> participants = participations.Select(p => p.Offerer).ToList<User>();
-
             // Shuffle list
             int n = participants.Count;
             while (n > 1)
@@ -250,9 +251,9 @@ namespace classified_offering.Controllers
                          ? participants[0]
                          : participants[n + 1];
                 Participation part = participations.Where(p => p.OffererID == off.ID).First();
+                db.Entry(part).State = EntityState.Modified;
                 part.ReceiverID = rec.ID;
             }
-
         }
 
         protected override void Dispose(bool disposing)

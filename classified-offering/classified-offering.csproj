@@ -253,9 +253,6 @@
     <Content Include="Views\ClassifiedOfferings\Edit.cshtml" />
     <Content Include="Views\ClassifiedOfferings\Index.cshtml" />
     <Content Include="Views\Participations\Add.cshtml" />
-    <Content Include="Views\Participations\Delete.cshtml" />
-    <Content Include="Views\Participations\Details.cshtml" />
-    <Content Include="Views\Participations\Edit.cshtml" />
     <Content Include="Views\Participations\Index.cshtml" />
     <Content Include="Views\Users\Details.cshtml" />
     <Content Include="Views\Users\Edit.cshtml" />
