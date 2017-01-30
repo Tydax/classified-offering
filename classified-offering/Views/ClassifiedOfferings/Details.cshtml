@@ -1,14 +1,12 @@
 ﻿@model classified_offering.Models.ClassifiedOffering
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Classified offering details";
 }
 
-<h2>Details</h2>
+<h2>Classified offering details</h2>
 
 <div>
-    <h4>ClassifiedOffering</h4>
-    <hr />
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Creator.Pseudo)
@@ -34,9 +32,26 @@
             @Html.DisplayFor(model => model.CreationDate)
         </dd>
 
+        <dt>
+            @Html.DisplayNameFor(model => model.Participations)
+        </dt>
+
+        <dd>
+            <ul>
+                @foreach (var item in Model.Participations)
+                {
+                    <li>@Html.DisplayFor(modelItem => item.Offerer.Pseudo)</li>
+                }
+            </ul>
+        </dd>
     </dl>
 </div>
 <p>
+    @if (!Model.isLocked)
+    {
+        @Html.ActionLink("Add participations", "Add", "Participations", new { id = Model.ID }, null)<text> |</text>
+        @Html.ActionLink("Generate offerers", "Lock", new { id = Model.ID }) <text> |</text>
+}
     @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
     @Html.ActionLink("Back to List", "Index")
 </p>

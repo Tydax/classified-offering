@@ -1,0 +1,19 @@
+﻿@model classified_offering.Models.ClassifiedOffering
+
+@{
+    ViewBag.Title = "Generate participants";
+}
+
+<h2>Generate participants</h2>
+
+<h3>Participant generation cannot be canceled or redone. Are you sure?</h3>
+<div>
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Lock" class="btn btn-default" /> |
+            @Html.ActionLink("Back to Details", "Details", new { id = Model.ID })
+        </div>
+    }
+</div>

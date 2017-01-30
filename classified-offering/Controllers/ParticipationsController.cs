@@ -18,16 +18,21 @@ namespace classified_offering.Controllers
         {
             User user = (User) Session["connectedUser"];
 
-            bool hasAccess = false;
-            if (user != null && id != null)
+            if (user == null)
+            {
+                return RedirectToAction("SignIn", "User");
+            }
+
+            if (id != null)
             {
                 ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
-                hasAccess = user.ID == classifiedOffering.CreatorID || user.Role == 0;
+                if (user.ID != classifiedOffering.CreatorID && user.Role != 0)
+                {
+                    return RedirectToAction("Forbidden", "Home");
+                }
             }
             
-            return !hasAccess
-                 ? Redirect("/User/SignIn")
-                 : null;
+            return null;
         }
 
         // GET: Participations/Add
@@ -81,7 +86,7 @@ namespace classified_offering.Controllers
             {
                 db.Participations.Add(participation);
                 db.SaveChanges();
-                return Redirect("/ClassifiedOfferings/Details/" + id);
+                return RedirectToAction("Details", "ClassifiedOfferings", new { id = id });
             }
 
             ViewBag.ReceiverID = new SelectList(db.Users, "ID", "Pseudo", participation.ReceiverID);
@@ -122,7 +127,7 @@ namespace classified_offering.Controllers
             }
             db.Participations.Remove(participation);
             db.SaveChanges();
-            return Redirect("/ClassifiedOfferings/Details/" + id);
+            return RedirectToAction("Details", "ClassifiedOfferings", new { id = id });
         }
 
         protected override void Dispose(bool disposing)

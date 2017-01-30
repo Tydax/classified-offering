@@ -17,7 +17,7 @@ namespace classified_offering.Controllers
         private ActionResult CheckAuthenticated()
         {
             return Session["connectedUser"] != null
-                 ? Redirect("/")
+                 ? RedirectToAction("Index", "Home")
                  : null;
         }
 
@@ -49,7 +49,7 @@ namespace classified_offering.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult SignUp([Bind(Include = "ID,Pseudo,FirstName,LastName,Email,Password")] User user)
         {
-            if (db.Users.First(u => u.Pseudo == user.Pseudo) != null)
+            if (db.Users.Where(u => u.Pseudo == user.Pseudo).FirstOrDefault() != null)
             {
                 return View(user);
             }
@@ -61,7 +61,7 @@ namespace classified_offering.Controllers
                           : 1;
                 db.Users.Add(user);
                 db.SaveChanges();
-                return Redirect("/ClassifiedOfferings");
+                return RedirectToAction("Index", "ClassifiedOfferings");
             }
 
             return View(user);
@@ -78,12 +78,12 @@ namespace classified_offering.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult SignIn([Bind(Include = "Pseudo,Password")] User user)
         {
-            User userDb = db.Users.First(u => u.Pseudo == user.Pseudo && u.Password == user.Password);
+            User userDb = db.Users.Where(u => u.Pseudo == user.Pseudo && u.Password == user.Password).FirstOrDefault();
 
             if (userDb != null)
             {
                 Session["connectedUser"] = userDb;
-                return Redirect("/ClassifiedOfferings");
+                return RedirectToAction("Index", "ClassifiedOfferings");
             }
 
             return View(user);
@@ -101,8 +101,9 @@ namespace classified_offering.Controllers
                 Session["connectedUser"] = null;
             }
 
-            return Redirect("/");
+            return RedirectToAction("Index", "Home");
         }
+
 
         protected override void Dispose(bool disposing)
         {

@@ -15,6 +15,7 @@ namespace classified_offering.Models
         public DateTime CreationDate { get; set; }
         public int CreatorID { get; set; }
         public virtual User Creator { get; set; }
+        public bool isLocked { get; set; }
 
         public virtual ICollection<Participation> Participations { get; set; }
     }

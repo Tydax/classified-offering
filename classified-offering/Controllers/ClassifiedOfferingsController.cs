@@ -17,9 +17,18 @@ namespace classified_offering.Controllers
         private ActionResult CheckAuthenticated(int? id = null)
         {
             User user = (User)Session["connectedUser"];
-            return user == null || (id != null && user.ID != id && user.Role != 0)
-                 ? Redirect("/User/SignIn")
-                 : null;
+
+            if (user == null)
+            {
+                return Redirect("/User/SignIn");
+            }
+
+            if (id != null && user.ID != id && user.Role != 0)
+            {
+                return RedirectToAction("Forbidden", "Home");
+            }
+
+            return null;
         }
 
         // GET: ClassifiedOfferings
@@ -79,8 +88,15 @@ namespace classified_offering.Controllers
 
             if (ModelState.IsValid)
             {
+                // Update classified offering
                 classifiedOffering.CreatorID = ((User) Session["connectedUser"]).ID;
+                classifiedOffering.CreationDate = DateTime.Now;
+                classifiedOffering.isLocked = false;
                 db.ClassifiedOfferings.Add(classifiedOffering);
+                // Create participation for creator
+                Participation participation = new Participation();
+                participation.OffererID = classifiedOffering.CreatorID;
+                db.Participations.Add(participation);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -90,7 +106,6 @@ namespace classified_offering.Controllers
         // GET: ClassifiedOfferings/Edit/5
         public ActionResult Edit(int? id)
         {
-           
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -157,20 +172,87 @@ namespace classified_offering.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            ActionResult NotAuthenticated = CheckAuthenticated();
-            if (NotAuthenticated != null)
-            {
-                return NotAuthenticated;
-            }
             ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
-            User connectedUser = (User) Session["connectedUser"];
-            if (connectedUser.ID != classifiedOffering.CreatorID || connectedUser.Role != 0)
+            ActionResult NotAuthenticated = CheckAuthenticated(classifiedOffering.CreatorID);
+            if (NotAuthenticated != null)
             {
                 return NotAuthenticated;
             }
             db.ClassifiedOfferings.Remove(classifiedOffering);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        // GET: ClassifiedOfferings/Lock
+        public ActionResult Lock(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Find(id);
+            if (classifiedOffering == null)
+            {
+                return HttpNotFound();
+            }
+            ActionResult NotAuthenticated = CheckAuthenticated(classifiedOffering.CreatorID);
+            if (NotAuthenticated != null)
+            {
+                return NotAuthenticated;
+            }
+            return View(classifiedOffering);
+        }
+
+        // POST: ClassifiedOfferings/Lock
+        [HttpPost, ActionName("Lock")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Lock(int id)
+        {
+            ClassifiedOffering classifiedOffering = db.ClassifiedOfferings.Include(co => co.Participations).First(co => co.ID == id);
+            ActionResult NotAuthenticated = CheckAuthenticated(classifiedOffering.CreatorID);
+            if (NotAuthenticated != null)
+            {
+                return NotAuthenticated;
+            }
+            if (!classifiedOffering.isLocked)
+            {
+                classifiedOffering.isLocked = true;
+                generateParticipations(classifiedOffering);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Details", new { id = id });
+        }
+
+
+        private static Random RNG = new Random();
+
+        private void generateParticipations(ClassifiedOffering co)
+        {
+            ICollection<Participation> participations = co.Participations;
+            IList<User> participants = participations.Select(p => p.Offerer).ToList<User>();
+
+            // Shuffle list
+            int n = participants.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = RNG.Next(n + 1);
+                User value = participants[k];
+                participants[k] = participants[n];
+                participants[n] = value;
+            }
+
+            for (n = 0; n < participants.Count; n++)
+            {
+                User off = participants[n];
+                User rec = n == participants.Count - 1
+                         ? participants[0]
+                         : participants[n + 1];
+                Participation part = participations.Where(p => p.OffererID == off.ID).First();
+                part.ReceiverID = rec.ID;
+            }
+
         }
 
         protected override void Dispose(bool disposing)
